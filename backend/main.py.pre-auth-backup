@@ -1,0 +1,225 @@
+from contextlib import asynccontextmanager
+from datetime import date
+from decimal import Decimal
+
+import psycopg
+from fastapi import FastAPI, HTTPException, Query
+from pydantic import BaseModel, ConfigDict, Field
+from pydantic_settings import BaseSettings
+from psycopg.rows import dict_row
+
+
+class Settings(BaseSettings):
+    database_url: str = (
+        "postgresql://tec_kpi:development_only@db:5432/tec_kpi"
+    )
+
+    class Config:
+        env_file = ".env"
+
+
+settings = Settings()
+
+
+def get_connection():
+    return psycopg.connect(
+        settings.database_url,
+        connect_timeout=5,
+        row_factory=dict_row,
+    )
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    try:
+        with get_connection() as conn:
+            conn.execute("SELECT 1")
+        app.state.database_ready = True
+    except Exception as exc:
+        app.state.database_ready = False
+        print(f"Database connection failed: {exc}")
+    yield
+
+
+app = FastAPI(
+    title="TEC KPI API",
+    description="Institutional performance tracking API",
+    version="0.2.0",
+    lifespan=lifespan,
+)
+
+
+class ProductionCreate(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    unit_id: int = Field(gt=0)
+    record_date: date
+    product_name: str = Field(min_length=1, max_length=200)
+    quantity: Decimal = Field(ge=0, max_digits=14, decimal_places=2)
+    unit_of_measure: str = Field(min_length=1, max_length=40)
+    unit_cost: Decimal = Field(
+        default=Decimal("0"), ge=0, max_digits=14, decimal_places=2
+    )
+    total_cost: Decimal | None = Field(
+        default=None, ge=0, max_digits=14, decimal_places=2
+    )
+    revenue: Decimal = Field(
+        default=Decimal("0"), ge=0, max_digits=14, decimal_places=2
+    )
+    notes: str | None = None
+
+
+@app.get("/api/health")
+def health():
+    return {"status": "ok", "service": "tec-kpi-api"}
+
+
+@app.get("/api/health/database")
+def database_health():
+    try:
+        with get_connection() as conn:
+            conn.execute("SELECT 1")
+        return {"status": "ok", "database": "connected"}
+    except Exception:
+        raise HTTPException(
+            status_code=503,
+            detail="Database is unavailable",
+        )
+
+
+@app.get("/api/units")
+def list_units():
+    with get_connection() as conn:
+        rows = conn.execute(
+            "SELECT id, name, unit_type FROM units ORDER BY name"
+        ).fetchall()
+    return rows
+
+
+@app.get("/api/production")
+def list_production(
+    unit_id: int | None = Query(default=None, gt=0),
+    start_date: date | None = None,
+    end_date: date | None = None,
+    limit: int = Query(default=100, ge=1, le=500),
+    offset: int = Query(default=0, ge=0),
+):
+    if start_date and end_date and end_date < start_date:
+        raise HTTPException(
+            status_code=422,
+            detail="end_date must be on or after start_date",
+        )
+
+    conditions = []
+    params = []
+
+    if unit_id is not None:
+        conditions.append("p.unit_id = %s")
+        params.append(unit_id)
+
+    if start_date is not None:
+        conditions.append("p.record_date >= %s")
+        params.append(start_date)
+
+    if end_date is not None:
+        conditions.append("p.record_date <= %s")
+        params.append(end_date)
+
+    where_clause = (
+        "WHERE " + " AND ".join(conditions) if conditions else ""
+    )
+
+    query = f"""
+        SELECT
+            p.id, p.unit_id, u.name AS unit_name,
+            p.record_date, p.product_name, p.quantity,
+            p.unit_of_measure, p.unit_cost, p.total_cost,
+            p.revenue, p.notes, p.created_at, p.updated_at
+        FROM production_records AS p
+        JOIN units AS u ON u.id = p.unit_id
+        {where_clause}
+        ORDER BY p.record_date DESC, p.id DESC
+        LIMIT %s OFFSET %s
+    """
+
+    params.extend([limit, offset])
+
+    with get_connection() as conn:
+        rows = conn.execute(query, params).fetchall()
+
+    return rows
+
+
+@app.get("/api/production/{record_id}")
+def get_production_record(record_id: int):
+    with get_connection() as conn:
+        row = conn.execute(
+            """
+            SELECT
+                p.id, p.unit_id, u.name AS unit_name,
+                p.record_date, p.product_name, p.quantity,
+                p.unit_of_measure, p.unit_cost, p.total_cost,
+                p.revenue, p.notes, p.created_at, p.updated_at
+            FROM production_records AS p
+            JOIN units AS u ON u.id = p.unit_id
+            WHERE p.id = %s
+            """,
+            (record_id,),
+        ).fetchone()
+
+    if row is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Production record not found",
+        )
+
+    return row
+
+
+@app.post("/api/production", status_code=201)
+def create_production_record(record: ProductionCreate):
+    with get_connection() as conn:
+        unit = conn.execute(
+            "SELECT id FROM units WHERE id = %s",
+            (record.unit_id,),
+        ).fetchone()
+
+        if unit is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Production unit not found",
+            )
+
+        total_cost = record.total_cost
+        if total_cost is None:
+            total_cost = (
+                record.quantity * record.unit_cost
+            ).quantize(Decimal("0.01"))
+
+        row = conn.execute(
+            """
+            INSERT INTO production_records (
+                unit_id, record_date, product_name,
+                quantity, unit_of_measure, unit_cost,
+                total_cost, revenue, notes
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING
+                id, unit_id, record_date, product_name,
+                quantity, unit_of_measure, unit_cost,
+                total_cost, revenue, notes, created_at
+            """,
+            (
+                record.unit_id,
+                record.record_date,
+                record.product_name,
+                record.quantity,
+                record.unit_of_measure,
+                record.unit_cost,
+                total_cost,
+                record.revenue,
+                record.notes,
+            ),
+        ).fetchone()
+
+    return row

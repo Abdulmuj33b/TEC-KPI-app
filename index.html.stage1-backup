@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#123b2c">
+  <title>TEC KPI | Performance Tracker</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">TEC</div>
+      <button type="button" class="menu-toggle" id="menu-toggle"
+        aria-expanded="true" aria-label="Hide navigation"
+        title="Hide or show menu">☰</button>
+      <div><strong>TEC KPI</strong><small>Performance Tracker</small></div>
+    </div>
+
+    <p class="nav-label">WORKSPACE</p>
+    <nav>
+      <button class="nav-link active" data-page="dashboard">▦ <span>Dashboard</span></button>
+      <button class="nav-link" data-page="production">▤ <span>Production Units</span></button>
+      <button class="nav-link" data-page="training">◫ <span>Training & Courses</span></button>
+      <button class="nav-link" data-page="research">⌘ <span>Research & Development</span></button>
+      <button class="nav-link" data-page="reports">＋ <span>Record a Report</span></button>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <span class="status-dot"></span>
+      <div><strong>Demo mode</strong><small>Local sample data</small></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">INSTITUTIONAL PERFORMANCE</p>
+        <h1 id="page-title">Overview dashboard</h1>
+      </div>
+      <div class="top-right">
+        <span class="demo-tag">DEMO</span>
+        <span class="avatar">A</span>
+      </div>
+    </header>
+
+    <section class="page active-page" id="dashboard">
+      <div class="welcome">
+        <div>
+          <p class="eyebrow light">PERFORMANCE AT A GLANCE</p>
+          <h2>Measure output. Improve performance.</h2>
+          <p>Monitor production, training and innovation from one workspace.</p>
+        </div>
+        <button class="primary-btn" data-go="reports">＋ New report</button>
+      </div>
+
+      <div class="section-heading">
+        <div><h2>Institutional indicators</h2><p>Sample figures for interface testing only</p></div>
+        <span class="period">All-time demo view</span>
+      </div>
+
+      <div class="metrics">
+        <article class="metric-card"><span class="metric-icon green">₦</span><p>Recorded revenue</p><h3 id="total-revenue">₦0</h3><small>From submitted demo reports</small></article>
+        <article class="metric-card"><span class="metric-icon blue">▤</span><p>Production units</p><h3>7</h3><small>Units configured</small></article>
+        <article class="metric-card"><span class="metric-icon orange">◫</span><p>Training programmes</p><h3>3</h3><small>Programme categories</small></article>
+        <article class="metric-card"><span class="metric-icon purple">⌘</span><p>R&D categories</p><h3>4</h3><small>Areas to track</small></article>
+      </div>
+
+      <div class="content-grid">
+        <article class="panel">
+          <div class="panel-heading"><div><h2>Production units</h2><p>Choose a unit to inspect its reporting area.</p></div></div>
+          <div class="unit-grid" id="unit-grid"></div>
+        </article>
+        <article class="panel">
+          <div class="panel-heading"><div><h2>Recent reports</h2><p>Reports entered in this browser session.</p></div></div>
+          <div id="recent-reports" class="recent-list"><div class="empty-state">No reports recorded yet. Create your first report to begin.</div></div>
+        </article>
+      </div>
+      <p class="notice">Demo data only. Figures entered here are not yet saved to a central database and are not official institutional KPIs.</p>
+    </section>
+
+    <section class="page" id="production">
+      <div class="section-heading"><div><h2>Production management</h2><p>Record output, sales, revenue, stock and operational challenges.</p></div><button class="primary-btn" data-go="reports">＋ Record output</button></div>
+      <div class="unit-grid large-grid" id="production-grid"></div>
+      <article class="panel table-panel">
+        <div class="panel-heading"><div><h2>Production reports</h2><p>Records entered during this demo.</p></div></div>
+        <div class="table-wrap"><table><thead><tr><th>Date</th><th>Unit</th><th>Output</th><th>Revenue</th><th>Status</th></tr></thead><tbody id="production-rows"><tr><td colspan="5">No reports recorded yet.</td></tr></tbody></table></div>
+      </article>
+    </section>
+
+    <section class="page" id="training">
+      <div class="section-heading">
+        <div><h2>Training & courses</h2><p>Record individual programmes or import a larger dataset.</p></div>
+        <button class="primary-btn" data-go="training-report">＋ New training report</button>
+      </div>
+
+      <div class="metrics">
+        <article class="metric-card"><span class="metric-icon green">01</span><p>Reports</p><h3 id="training-count">0</h3><small>Training records imported or entered</small></article>
+        <article class="metric-card"><span class="metric-icon blue">02</span><p>Students enrolled</p><h3 id="training-enrolled">0</h3><small>Total across current demo records</small></article>
+        <article class="metric-card"><span class="metric-icon orange">03</span><p>Students completed</p><h3 id="training-completed">0</h3><small>Total across current demo records</small></article>
+      </div>
+
+      <article class="panel">
+        <div class="panel-heading"><div><h2>Bulk import training records</h2><p>Upload a CSV file exported from Excel or LibreOffice.</p></div></div>
+        <p class="muted">Required columns: start_date, end_date, course, level, skill, facilitators, enrolled, trained, completed. Optional column: status.</p>
+        <p><button type="button" class="secondary-btn" id="download-training-template">Download CSV template</button></p>
+        <label class="upload-label">Choose training CSV file
+          <input type="file" id="training-csv" accept=".csv,text/csv">
+        </label>
+        <p id="csv-message" class="form-message" role="status"></p>
+        <div id="csv-preview" class="table-wrap"></div>
+        <div class="form-actions">
+          <button type="button" class="secondary-btn" id="cancel-training-import">Cancel import</button>
+          <button type="button" class="primary-btn" id="import-training" disabled>Import valid rows</button>
+        </div>
+      </article>
+
+      <article class="panel table-panel">
+        <div class="panel-heading"><div><h2>Training records</h2><p>Current browser-session records.</p></div></div>
+        <div class="table-wrap"><table><thead><tr><th>Training period</th><th>Programme</th><th>Skill</th><th>Facilitators</th><th>Enrolled</th><th>Trained</th><th>Completed</th><th>Status</th></tr></thead><tbody id="training-rows"><tr><td colspan="8">No training records yet.</td></tr></tbody></table></div>
+      </article>
+    </section>
+
+    <section class="page" id="research">
+      <div class="section-heading">
+        <div><h2>Research & Development</h2><p>Track grants, innovation, incubation, projects and partnerships.</p></div>
+        <button class="primary-btn" data-go="research-report">＋ New R&D report</button>
+      </div>
+      <div class="unit-grid large-grid">
+        <article class="unit-card"><span class="unit-symbol">₦</span><h3>Grants & funding</h3><p>Grant applications, awards and funding amounts.</p></article>
+        <article class="unit-card"><span class="unit-symbol">✦</span><h3>Innovations & prototypes</h3><p>Research outputs, prototypes and development milestones.</p></article>
+        <article class="unit-card"><span class="unit-symbol">↗</span><h3>Incubation & startups</h3><p>Incubated businesses, startups and commercialization.</p></article>
+        <article class="unit-card"><span class="unit-symbol">⇄</span><h3>Projects & partnerships</h3><p>Research projects, collaborators and project progress.</p></article>
+      </div>
+      <article class="panel table-panel">
+        <div class="panel-heading"><div><h2>R&D reports</h2><p>Current browser-session records.</p></div></div>
+        <div class="table-wrap"><table><thead><tr><th>Date</th><th>Category</th><th>Project / innovation</th><th>Funding (₦)</th><th>Status</th></tr></thead><tbody id="research-rows"><tr><td colspan="5">No R&D records yet.</td></tr></tbody></table></div>
+      </article>
+    </section>
+
+    <section class="page" id="training-report">
+      <div class="section-heading"><div><h2>New training report</h2><p>Record one course or training programme.</p></div></div>
+      <article class="panel form-panel">
+        <form id="training-form">
+          <div class="form-grid">
+            <label>Training start date *<input type="date" id="tr-start-date" required></label>
+            <label>Training end date *<input type="date" id="tr-end-date" required></label>
+            <label>Programme *<select id="tr-level" required><option value="">Choose programme</option><option>200-level ENT</option><option>300-level Skill Acquisition / Venture Creation</option><option>Upper-level course</option><option>Other</option></select></label>
+            <label>Individual skill *<input id="tr-skill" maxlength="150" required placeholder="e.g. Leatherwork"></label>
+            <label>Course / training activity *<input id="tr-course" maxlength="150" required placeholder="e.g. Practical leather bag production"></label>
+            <label>Number of facilitators *<input type="number" id="tr-facilitators" min="0" step="1" required></label>
+            <label>Students enrolled *<input type="number" id="tr-enrolled" min="0" step="1" required></label>
+            <label>Students trained *<input type="number" id="tr-trained" min="0" step="1" required></label>
+            <label>Students completed *<input type="number" id="tr-completed" min="0" step="1" required></label>
+            <label>Status<select id="tr-status"><option>Draft</option><option>Submitted</option></select></label>
+            <label class="full-field">Notes / challenges<textarea id="tr-notes" rows="3" maxlength="2000"></textarea></label>
+          </div>
+          <div class="form-actions"><button type="button" class="secondary-btn" data-go="training">Cancel</button><button type="submit" class="primary-btn">Save training report</button></div>
+          <p id="training-form-message" class="form-message" role="status"></p>
+        </form>
+      </article>
+    </section>
+
+    <section class="page" id="research-report">
+      <div class="section-heading"><div><h2>New R&D report</h2><p>Record a research, innovation or commercialization activity.</p></div></div>
+      <article class="panel form-panel">
+        <form id="research-form">
+          <div class="form-grid">
+            <label>Reporting date *<input type="date" id="rd-date" required></label>
+            <label>Category *<select id="rd-category" required><option value="">Choose category</option><option>Grant / funding</option><option>Innovation / prototype</option><option>Incubation / startup</option><option>Research project</option><option>Partnership</option><option>Commercialization</option><option>Publication</option></select></label>
+            <label class="full-field">Project / innovation title *<input id="rd-title" maxlength="180" required></label>
+            <label>Funding amount (₦)<input type="number" id="rd-funding" min="0" step="0.01" value="0"></label>
+            <label>Status *<select id="rd-status" required><option>Draft</option><option>Submitted</option><option>In progress</option><option>Completed</option><option>On hold</option></select></label>
+            <label>Partner / funding body<input id="rd-partner" maxlength="180"></label>
+            <label>Milestone / target date<input type="date" id="rd-target"></label>
+            <label class="full-field">Progress, outcomes and challenges<textarea id="rd-notes" rows="4" maxlength="3000"></textarea></label>
+          </div>
+          <div class="form-actions"><button type="button" class="secondary-btn" data-go="research">Cancel</button><button type="submit" class="primary-btn">Save R&D report</button></div>
+          <p id="research-form-message" class="form-message" role="status"></p>
+        </form>
+      </article>
+    </section>
+
+    <section class="page" id="reports">
+      <div class="section-heading"><div><h2>Record a report</h2><p>Enter a unit's production or operational results.</p></div></div>
+      <article class="panel form-panel">
+        <div class="form-intro"><h2>Unit performance report</h2><p>All fields marked * are required.</p></div>
+        <form id="report-form">
+          <div class="form-grid">
+            <label>Reporting date *<input type="date" id="report-date" required></label>
+            <label>Production unit *<select id="report-unit" required></select></label>
+            <label>Product or activity *<input id="report-product" maxlength="120" placeholder="e.g. Leather bags" required></label>
+            <label>Quantity produced *<input type="number" id="report-output" min="0" step="any" placeholder="0" required></label>
+            <label>Quantity sold<input type="number" id="report-sold" min="0" step="any" value="0"></label>
+            <label>Revenue (₦) *<input type="number" id="report-revenue" min="0" step="0.01" placeholder="0.00" required></label>
+            <label>Stock remaining<input type="number" id="report-stock" min="0" step="any" value="0"></label>
+            <label>Report status<select id="report-status"><option value="Draft">Draft</option><option value="Submitted">Submitted</option></select></label>
+            <label class="full-field">Challenges<textarea id="report-challenges" rows="3" maxlength="2000" placeholder="Describe operational challenges, if any."></textarea></label>
+            <label class="full-field">Recommendations<textarea id="report-recommendations" rows="3" maxlength="2000" placeholder="Suggest corrective actions or improvements."></textarea></label>
+          </div>
+          <div class="form-actions"><button type="reset" class="secondary-btn">Clear form</button><button type="submit" class="primary-btn">Save demo report</button></div>
+          <p id="form-message" class="form-message" role="status"></p>
+        </form>
+      </article>
+    </section>
+
+    <footer>TEC KPI Performance Tracker · Initial prototype · Not for official reporting</footer>
+  </main>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

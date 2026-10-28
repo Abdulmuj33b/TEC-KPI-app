@@ -1,0 +1,55 @@
+from contextlib import asynccontextmanager
+
+import psycopg
+from fastapi import FastAPI, HTTPException
+from pydantic_settings import BaseSettings
+
+
+class Settings(BaseSettings):
+    database_url: str = (
+        "postgresql://tec_kpi:development_only@db:5432/tec_kpi"
+    )
+
+    class Config:
+        env_file = ".env"
+
+
+settings = Settings()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    app.state.database_ready = False
+    try:
+        with psycopg.connect(settings.database_url, connect_timeout=5) as conn:
+            conn.execute("SELECT 1")
+        app.state.database_ready = True
+    except Exception as exc:
+        print(f"Database connection failed: {exc}")
+    yield
+
+
+app = FastAPI(
+    title="TEC KPI API",
+    description="Institutional performance tracking API",
+    version="0.1.0",
+    lifespan=lifespan,
+)
+
+
+@app.get("/api/health")
+def health():
+    return {"status": "ok", "service": "tec-kpi-api"}
+
+
+@app.get("/api/health/database")
+def database_health():
+    try:
+        with psycopg.connect(settings.database_url, connect_timeout=5) as conn:
+            conn.execute("SELECT 1")
+        return {"status": "ok", "database": "connected"}
+    except Exception:
+        raise HTTPException(
+            status_code=503,
+            detail="Database is unavailable",
+        )
