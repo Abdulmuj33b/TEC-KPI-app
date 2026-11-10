@@ -5,3 +5,4 @@ pydantic-settings
 pwdlib[argon2]
 PyJWT
 python-multipart
+email-validator
