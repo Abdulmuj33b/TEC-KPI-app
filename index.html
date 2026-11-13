@@ -101,18 +101,25 @@
       </div>
 
       <article class="panel">
-        <div class="panel-heading"><div><h2>Bulk import training records</h2><p>Upload a CSV file exported from Excel or LibreOffice.</p></div></div>
-        <p class="muted">Required columns: start_date, end_date, course, level, skill, facilitators, enrolled, trained, completed. Optional column: status.</p>
+        <div class="panel-heading"><div><h2>Connect to TEC KPI API</h2><p>Sign in with your TEC KPI administrator account to load and save database records.</p></div></div>
+        <form id="training-login-form" class="form-grid">
+          <label>Administrator email *<input type="email" id="training-email" autocomplete="username" required></label>
+          <label>Password *<input type="password" id="training-password" autocomplete="current-password" required></label>
+          <div class="form-actions full-field"><button type="submit" class="primary-btn">Connect</button><button type="button" class="secondary-btn" id="training-disconnect">Disconnect</button></div>
+        </form>
+        <p id="training-api-message" class="form-message" role="status">Not connected.</p>
+      </article>
+
+      <article class="panel">
+        <div class="panel-heading"><div><h2>Bulk import training records</h2><p>Import activities directly into PostgreSQL.</p></div></div>
+        <p class="muted">CSV columns: programme, start_date, end_date, course, level, skill, unit, enrolled, trained, completed, facilitator_names, status, notes. Separate multiple facilitator names with semicolons. Programme, skill, unit and facilitator names must already exist in the database.</p>
         <p><button type="button" class="secondary-btn" id="download-training-template">Download CSV template</button></p>
         <label class="upload-label">Choose training CSV file
           <input type="file" id="training-csv" accept=".csv,text/csv">
         </label>
         <p id="csv-message" class="form-message" role="status"></p>
+        <div class="form-actions"><button type="button" class="primary-btn" id="import-training" disabled>Import CSV to database</button></div>
         <div id="csv-preview" class="table-wrap"></div>
-        <div class="form-actions">
-          <button type="button" class="secondary-btn" id="cancel-training-import">Cancel import</button>
-          <button type="button" class="primary-btn" id="import-training" disabled>Import valid rows</button>
-        </div>
       </article>
 
       <article class="panel table-panel">
@@ -145,14 +152,16 @@
           <div class="form-grid">
             <label>Training start date *<input type="date" id="tr-start-date" required></label>
             <label>Training end date *<input type="date" id="tr-end-date" required></label>
-            <label>Programme *<select id="tr-level" required><option value="">Choose programme</option><option>200-level ENT</option><option>300-level Skill Acquisition / Venture Creation</option><option>Upper-level course</option><option>Other</option></select></label>
-            <label>Individual skill *<input id="tr-skill" maxlength="150" required placeholder="e.g. Leatherwork"></label>
+            <label>Programme *<select id="tr-programme" required><option value="">Connect to load programmes</option></select></label>
+            <label>Individual skill *<select id="tr-skill" required><option value="">Select a programme first</option></select></label>
+            <label>Student level *<input id="tr-level" maxlength="150" required placeholder="e.g. 300-level"></label>
+            <label>Production unit<select id="tr-unit"><option value="">Institution-wide / not applicable</option></select></label>
             <label>Course / training activity *<input id="tr-course" maxlength="150" required placeholder="e.g. Practical leather bag production"></label>
-            <label>Number of facilitators *<input type="number" id="tr-facilitators" min="0" step="1" required></label>
+            <label class="full-field">Facilitators *<select id="tr-facilitators" multiple size="4" required></select><small>Hold Ctrl (or Command on Mac) to select multiple facilitators.</small></label>
             <label>Students enrolled *<input type="number" id="tr-enrolled" min="0" step="1" required></label>
             <label>Students trained *<input type="number" id="tr-trained" min="0" step="1" required></label>
             <label>Students completed *<input type="number" id="tr-completed" min="0" step="1" required></label>
-            <label>Status<select id="tr-status"><option>Draft</option><option>Submitted</option></select></label>
+            <label>Status<select id="tr-status"><option value="draft">Draft</option><option value="ongoing">Ongoing</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></label>
             <label class="full-field">Notes / challenges<textarea id="tr-notes" rows="3" maxlength="2000"></textarea></label>
           </div>
           <div class="form-actions"><button type="button" class="secondary-btn" data-go="training">Cancel</button><button type="submit" class="primary-btn">Save training report</button></div>

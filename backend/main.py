@@ -2,8 +2,9 @@
 # TEC KPI API
 
 from contextlib import asynccontextmanager
-
+from routers.training import router as training_router
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 from database import get_connection
 from security import CurrentUser
@@ -33,12 +34,25 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5500",
+        "http://127.0.0.1:5500",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # Register API routers
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(production_router)
-
+app.include_router(training_router)
 
 # --------------------------------------------------
 # HEALTH CHECK ENDPOINTS
