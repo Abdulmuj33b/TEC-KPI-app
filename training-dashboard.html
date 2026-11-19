@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TEC KPI | Training Dashboard</title>
+  <link rel="stylesheet" href="css/training-dashboard.css">
+</head>
+<body>
+  <header class="topbar">
+    <div><p class="eyebrow">TECHNICAL & ENTREPRENEURSHIP CENTRE</p><h1>Training Dashboard</h1><p class="sub">Training performance, participation and delivery overview</p></div>
+    <a class="back" href="index.html">← Back to TEC KPI</a>
+  </header>
+  <main>
+    <section class="panel auth">
+      <div><h2>API connection</h2><p id="connection-status">Not connected. Sign in with your TEC KPI administrator account.</p></div>
+      <form id="login-form">
+        <input id="email" type="email" placeholder="Administrator email" autocomplete="username" required>
+        <input id="password" type="password" placeholder="Password" autocomplete="current-password" required>
+        <button>Connect</button>
+        <button type="button" class="secondary" id="disconnect">Disconnect</button>
+      </form>
+    </section>
+    <section class="toolbar">
+      <label>From <input type="date" id="from-date"></label>
+      <label>To <input type="date" id="to-date"></label>
+      <label>Programme <select id="programme"><option value="">All programmes</option></select></label>
+      <label>Unit <select id="unit"><option value="">All units</option></select></label>
+      <button id="apply-filters" class="secondary">Apply filters</button>
+      <button id="reset-filters" class="secondary">Reset</button>
+    </section>
+    <section class="kpis">
+      <article class="metric"><span>Training activities</span><strong id="k-activities">—</strong></article>
+      <article class="metric"><span>Enrolled</span><strong id="k-enrolled">—</strong></article>
+      <article class="metric"><span>Trained</span><strong id="k-trained">—</strong></article>
+      <article class="metric"><span>Completed</span><strong id="k-completed">—</strong></article>
+      <article class="metric"><span>Enrolment completion rate</span><strong id="k-rate">—</strong></article>
+      <article class="metric"><span>Trained-to-completed rate</span><strong id="k-conversion">—</strong></article>
+    </section>
+    <section class="grid">
+      <article class="panel"><h2>Programme performance</h2><div id="programme-chart" class="bars empty">Connect to load data.</div></article>
+      <article class="panel"><h2>Unit performance</h2><div id="unit-chart" class="bars empty">Connect to load data.</div></article>
+      <article class="panel"><h2>Monthly training activity</h2><div id="monthly-chart" class="bars empty">Connect to load data.</div></article>
+      <article class="panel"><h2>Facilitator workload</h2><div id="facilitator-chart" class="bars empty">Connect to load data.</div></article>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><div><h2>Training activity records</h2><p id="record-count">No records loaded.</p></div><button id="export-csv" class="secondary">Export filtered CSV</button></div>
+      <div class="table-wrap"><table><thead><tr><th>Activity</th><th>Programme</th><th>Skill</th><th>Unit</th><th>Period</th><th>Enrolled</th><th>Trained</th><th>Completed</th><th>Status</th><th>Facilitators</th></tr></thead><tbody id="records"><tr><td colspan="10">Connect to the API to load training records.</td></tr></tbody></table></div>
+    </section>
+    <p class="footnote">Figures are calculated from the activity-level counts currently stored in TEC KPI. They represent activity totals, not deduplicated individual participants.</p>
+  </main>
+  <script src="js/training-dashboard.js"></script>
+</body>
+</html>
