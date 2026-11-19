@@ -8,3 +8,19 @@
 .legend span:before{content:"";display:inline-block;width:9px;height:9px;border-radius:2px;background:#27836b;margin-right:5px}
 .legend .trained:before{background:#e0a33b}.legend .completed:before{background:#4c78a8}
 @media(min-width:900px){.kpis{grid-template-columns:repeat(6,1fr)}}
+
+.export-actions{display:flex;gap:8px;flex-wrap:wrap}
+@media print{
+ @page{size:landscape;margin:12mm}
+ body{background:#fff;color:#111;font-size:10px}
+ .topbar{background:#fff!important;color:#111;padding:0 0 12px;border-bottom:2px solid #174c40}
+ .topbar .sub{color:#444}.back,.auth,.toolbar,.export-actions,.footnote{display:none!important}
+ main{max-width:none;margin:0;padding:0}
+ .panel,.metric{box-shadow:none;border:1px solid #bbb;break-inside:avoid;padding:10px}
+ .kpis{grid-template-columns:repeat(6,1fr);gap:6px}
+ .metric strong{font-size:18px}
+ .grid{grid-template-columns:1fr 1fr;gap:8px}
+ .table-wrap{overflow:visible}
+ table{min-width:0;width:100%;font-size:8px}
+ th,td{padding:5px}th{position:static}h1{font-size:20px}
+}

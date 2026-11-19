@@ -61,5 +61,39 @@ $("login-form").addEventListener("submit",async e=>{e.preventDefault();setStatus
 $("disconnect").addEventListener("click",()=>{token="";sessionStorage.removeItem("tec_training_token");allRows=[];render();setStatus("Disconnected.");});
 $("apply-filters").addEventListener("click",render);
 $("reset-filters").addEventListener("click",()=>{["from-date","to-date","programme","unit"].forEach(id=>$(id).value="");render();});
-$("export-csv").addEventListener("click",()=>{const rows=filtered();const cols=["course_name","programme_name","skill_name","unit_name","start_date","end_date","enrolled","trained","completed","status"];const q=v=>`"${String(v??"").replace(/"/g,'""')}"`;const lines=[cols.join(","),...rows.map(r=>cols.map(c=>q(r[c])).join(","))];const blob=new Blob(["\ufeff"+lines.join("\r\n")],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="tec-training-dashboard.csv";a.click();URL.revokeObjectURL(a.href);});
+function exportRows(){
+  return filtered().map(r=>({
+    Activity:r.course_name, Programme:r.programme_name, Skill:r.skill_name,
+    Unit:r.unit_name||"Institutional", "Start date":r.start_date, "End date":r.end_date,
+    Enrolled:Number(r.enrolled||0), Trained:Number(r.trained||0), Completed:Number(r.completed||0),
+    Status:r.status, Facilitators:(r.facilitators||[]).map(f=>typeof f==="string"?f:f.full_name||"").join("; ")
+  }));
+}
+function downloadBlob(blob, filename){
+  const url=URL.createObjectURL(blob), a=document.createElement("a");
+  a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+$("export-csv").addEventListener("click",()=>{
+  const rows=exportRows(), headers=Object.keys(rows[0]||{});
+  if(!headers.length){setStatus("No matching records to export.");return;}
+  const q=v=>`"${String(v??"").replace(/"/g,'""')}"`;
+  const lines=[headers.map(q).join(","),...rows.map(r=>headers.map(h=>q(r[h])).join(","))];
+  downloadBlob(new Blob(["\ufeff"+lines.join("\r\n")],{type:"text/csv;charset=utf-8"}),"tec-training-dashboard.csv");
+});
+$("export-excel").addEventListener("click",()=>{
+  const rows=exportRows();
+  if(!rows.length){setStatus("No matching records to export.");return;}
+  if(!window.XLSX){setStatus("Excel library did not load. Check internet access and refresh.");return;}
+  const ws=XLSX.utils.json_to_sheet(rows);
+  ws["!cols"]=[{wch:34},{wch:38},{wch:34},{wch:18},{wch:14},{wch:14},{wch:12},{wch:12},{wch:12},{wch:14},{wch:42}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,"Training Activities");
+  XLSX.writeFile(wb,"tec-training-dashboard.xlsx");
+});
+$("export-pdf").addEventListener("click",()=>{
+  if(!filtered().length){setStatus("No matching records to print.");return;}
+  setStatus("In the print window, select Save to PDF as the destination.");
+  window.print();
+});
 if(token)load().catch(err=>{token="";sessionStorage.removeItem("tec_training_token");setStatus(`Session expired or unavailable: ${err.message}. Please connect again.`);});
