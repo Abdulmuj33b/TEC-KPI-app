@@ -3,6 +3,7 @@
 
 from contextlib import asynccontextmanager
 from routers.training import router as training_router
+from routers.research import router as research_router
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -53,6 +54,7 @@ app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(production_router)
 app.include_router(training_router)
+app.include_router(research_router)
 
 # --------------------------------------------------
 # HEALTH CHECK ENDPOINTS

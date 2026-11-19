@@ -17,7 +17,7 @@ class UserCreate(BaseModel):
     full_name: str = Field(min_length=3, max_length=150)
     email: EmailStr
     password: str = Field(min_length=12, max_length=128)
-    role: Literal["director", "administrator", "head_of_unit"]
+    role: Literal["director", "administrator", "head_of_unit", "research_officer"]
     unit_id: int | None = Field(default=None, gt=0)
 
 
@@ -33,12 +33,12 @@ def create_user(
         )
 
     if (
-        new_user.role in ("director", "administrator")
+        new_user.role in ("director", "administrator", "research_officer")
         and new_user.unit_id is not None
     ):
         raise HTTPException(
             status_code=422,
-            detail="Director and Administrator accounts cannot be assigned to a unit",
+            detail="Director, Administrator and R&D Officer accounts cannot be assigned to a production unit",
         )
 
     from security import password_hash

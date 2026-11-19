@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
     role VARCHAR(30) NOT NULL
-        CHECK (role IN ('director', 'administrator', 'head_of_unit')),
+        CHECK (role IN ('director', 'administrator', 'head_of_unit', 'research_officer')),
     unit_id BIGINT REFERENCES units(id) ON DELETE RESTRICT,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS users (
     CHECK (
         (role = 'head_of_unit' AND unit_id IS NOT NULL)
         OR
-        (role IN ('director', 'administrator') AND unit_id IS NULL)
+        (role IN ('director', 'administrator', 'research_officer') AND unit_id IS NULL)
     )
 );
 
